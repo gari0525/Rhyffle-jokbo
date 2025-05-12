@@ -18,29 +18,29 @@
 
 using namespace std;
 
-const char* rank_type[] = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}; // ·©Å© Á¾·ù ¼±¾ğ 
-const char* shape_type[SHAPE_CNT] = {"diamond", "spade", "heart", "clover"}; // ¹®¾ç Á¾·ù ¼±¾ğ 
+const char* rank_type[] = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}; // ë­í¬ ì¢…ë¥˜ ì„ ì–¸ 
+const char* shape_type[SHAPE_CNT] = {"diamond", "spade", "heart", "clover"}; // ë¬¸ì–‘ ì¢…ë¥˜ ì„ ì–¸ 
 
 struct card{
-	char rank[RANK_LEN]; // ·©Å©
-	char shape[SHAPE_LEN]; // ¹®¾ç
-	int durable; // ³»±¸µµ 
-	bool isSpecial; // Æ¯¼öÄ«µå ¿©ºÎ 
+	char rank[RANK_LEN]; // ë­í¬
+	char shape[SHAPE_LEN]; // ë¬¸ì–‘
+	int durable; // ë‚´êµ¬ë„ 
+	bool isSpecial; // íŠ¹ìˆ˜ì¹´ë“œ ì—¬ë¶€ 
 };
 
-unsigned int familyFreq[HAND_CNT]; // °¢ Á·º¸º° µîÀå È½¼ö
-unsigned int topFamilyCount[HAND_CNT]; // ÇØ´ç Á·º¸°¡ ÃÖ»óÀ§ Á·º¸·Î µîÀåÇÑ È½¼ö
+unsigned int familyFreq[HAND_CNT]; // ê° ì¡±ë³´ë³„ ë“±ì¥ íšŸìˆ˜
+unsigned int topFamilyCount[HAND_CNT]; // í•´ë‹¹ ì¡±ë³´ê°€ ìµœìƒìœ„ ì¡±ë³´ë¡œ ë“±ì¥í•œ íšŸìˆ˜
 unsigned int totalFamilyFreq[HAND_CNT];
 unsigned int totalTopFamilyCount[HAND_CNT];
-vector <card> deck; // deck¿¡ µé¾î°¥ Ä«µåµé 
-vector <card> grave; // ¹¦ºñ¿¡ µé¾î°¥ Ä«µåµé
-vector <int> note_lines; // ³ëÆ®°¡ ¶³¾îÁú ¶óÀÎÀÇ index 
+vector <card> deck; // deckì— ë“¤ì–´ê°ˆ ì¹´ë“œë“¤ 
+vector <card> grave; // ë¬˜ë¹„ì— ë“¤ì–´ê°ˆ ì¹´ë“œë“¤
+vector <int> note_lines; // ë…¸íŠ¸ê°€ ë–¨ì–´ì§ˆ ë¼ì¸ì˜ index 
 
 void initDeck() {
     deck.clear();
     grave.clear();
 
-	// ÀÏ¹İ 52Àå deck¿¡ Ãß°¡ 
+	// ì¼ë°˜ 52ì¥ deckì— ì¶”ê°€ 
     for (int s = 0; s < SHAPE_CNT; s++) {
         for (int r = 0; r < RANK_CNT; r++) {
             card c;
@@ -53,7 +53,7 @@ void initDeck() {
         }
     }
 
-    // Á¶Ä¿ 8Àå deck¿¡ Ãß°¡ 
+    // ì¡°ì»¤ 8ì¥ deckì— ì¶”ê°€ 
     for (int r = 0; r < JOKER_CNT; r++) {
         card c;
         
@@ -82,7 +82,7 @@ void initNote() {
         }
     }
 
-    random_shuffle(note_lines.begin(), note_lines.end()); // ¼ø¼­ randomÇÏ°Ô ¼¯À½ 
+    random_shuffle(note_lines.begin(), note_lines.end()); // ìˆœì„œ randomí•˜ê²Œ ì„ìŒ 
 }
 
 card draw_card() {
@@ -92,23 +92,23 @@ card draw_card() {
             deck.push_back(grave[i]);
         }
         grave.clear();
-    } // deckÀÌ ºó °æ¿ì grave¿¡¼­ Ä«µå revive 
+    } // deckì´ ë¹ˆ ê²½ìš° graveì—ì„œ ì¹´ë“œ revive 
 
-    int idx = rand() % deck.size(); // Ä«µå draw 
+    int idx = rand() % deck.size(); // ì¹´ë“œ draw 
     card newCard = deck[idx];
-    deck.erase(deck.begin() + idx); // ÇØ´ç Ä«µå µ¦¿¡¼­ Á¦°Å 
+    deck.erase(deck.begin() + idx); // í•´ë‹¹ ì¹´ë“œ ë±ì—ì„œ ì œê±° 
     
     return newCard;
 }
 
-void check_hand(card field[7]) {
+void check_hand(card field[LINE]) {
 	int bestHand = -1; 
     int rank_count[RANK_CNT] = {0};
     int shape_count[SHAPE_CNT] = {0};
     bool rank_exist[RANK_CNT] = {false};
 
     for (int i = 0; i < LINE; i++) {
-        // ·©Å© index
+        // ë­í¬ index
         int rank = 0;
         for (int r = 0; r < RANK_CNT; r++) {
             if (strcmp(field[i].rank, rank_type[r]) == 0) {
@@ -119,7 +119,7 @@ void check_hand(card field[7]) {
         rank_count[rank]++;
         rank_exist[rank] = true;
 
-        // ¹«´Ì index 
+        // ë¬´ëŠ¬ index 
         for (int s = 0; s < SHAPE_CNT; s++) {
             if (strcmp(field[i].shape, shape_type[s]) == 0) {
                 shape_count[s]++;
@@ -128,7 +128,7 @@ void check_hand(card field[7]) {
         }
     }
 
-    // ½ºÆ®·¹ÀÌÆ®/½ºÆ®·¹ÀÌÆ® ÇÃ·¯½Ã Å½»ö
+    // ìŠ¤íŠ¸ë ˆì´íŠ¸/ìŠ¤íŠ¸ë ˆì´íŠ¸ í”ŒëŸ¬ì‹œ íƒìƒ‰
     for (int start = 0; start <= 8; start++) {
         bool straight = true;
         bool straightFlash = false;
@@ -141,7 +141,7 @@ void check_hand(card field[7]) {
 
         if (straight) {
             familyFreq[4]++;
-            if(bestHand < 4)	bestHand = 4; // ½ºÆ®·¹ÀÌÆ®
+            if(bestHand < 4)	bestHand = 4; // ìŠ¤íŠ¸ë ˆì´íŠ¸
             
             for (int s = 0; s < SHAPE_CNT; s++) {
                 int count = 0;
@@ -152,21 +152,17 @@ void check_hand(card field[7]) {
                         count++;
                     }
                 }
-                if (count == 5)	{
-                	straightFlash = true;
-//                	familyFreq[8]++;
-//                	if(bestHand < 8)	bestHand = 8; // ½ºÆ®·¹ÀÌÆ® ÇÃ·¯½Ã
-				} 
+                if (count == 5)	straightFlash = true;
             }
             if(straightFlash)	{
             	familyFreq[8]++;
-            	if(bestHand < 8)	bestHand = 8; // ½ºÆ®·¹ÀÌÆ® ÇÃ·¯½Ã
+            	if(bestHand < 8)	bestHand = 8; // ìŠ¤íŠ¸ë ˆì´íŠ¸ í”ŒëŸ¬ì‹œ
             	break;
 			}
         }
     }
 
-    // Æ÷Ä«µå
+    // í¬ì¹´ë“œ
     for (int i = 0; i < RANK_CNT; i++){
     	if (rank_count[i] == 4)	{
     		familyFreq[7]++;
@@ -174,7 +170,7 @@ void check_hand(card field[7]) {
 		}
 	} 
 
-    // Æ®¸®ÇÃ + ¿øÆä¾î = Ç®ÇÏ¿ì½º
+    // íŠ¸ë¦¬í”Œ + ì›í˜ì–´ = í’€í•˜ìš°ìŠ¤
     bool has_triple = false, has_pair = false;
     for (int i = 0; i < RANK_CNT; i++) {
         if (rank_count[i] == 3) has_triple = true;
@@ -185,7 +181,7 @@ void check_hand(card field[7]) {
     	    if(bestHand < 6)	bestHand = 6;
 		}
 
-    // ÇÃ·¯½Ã
+    // í”ŒëŸ¬ì‹œ
     for (int i = 0; i < SHAPE_CNT; i++)	{
     	if (shape_count[i] >= 5)	{
     		familyFreq[5]++;
@@ -193,13 +189,13 @@ void check_hand(card field[7]) {
 		}
 	}
 
-    // Æ®¸®ÇÃ
+    // íŠ¸ë¦¬í”Œ
     if (has_triple)	{
     	familyFreq[3]++;
     	if(bestHand < 3)	bestHand = 3;
 	}
 
-    // Æä¾îµé °³¼ö ¼¼±â
+    // í˜ì–´ë“¤ ê°œìˆ˜ ì„¸ê¸°
     int pair_cnt = 0;
     for (int i = 0; i < RANK_CNT; i++) {
     	if (rank_count[i] == 2) pair_cnt++;
@@ -224,33 +220,33 @@ void check_hand(card field[7]) {
 
 void printSimulate(int trial)	{
 	unsigned long sum = 0;
-	printf("%d¹øÂ° ½Ã¹Ä·¹ÀÌ¼Ç\n\n", trial);
-	printf("Á·º¸ µîÀåÈ½¼ö\n");
-	printf("1. ¿ø Æä¾î\n\tµîÀå È½¼ö: %u, ÃÖ»óÀ§ Á·º¸: %u\n\n", familyFreq[0], topFamilyCount[0]);
-	printf("2. Åõ Æä¾î\n\tµîÀå È½¼ö: %u, ÃÖ»óÀ§ Á·º¸: %u\n\n", familyFreq[1], topFamilyCount[1]);
-	printf("3. ¾²¸® Æä¾î\n\tµîÀå È½¼ö: %u, ÃÖ»óÀ§ Á·º¸: %u\n\n", familyFreq[2], topFamilyCount[2]);
-	printf("4. Æ®¸®ÇÃ\n\tµîÀå È½¼ö: %u, ÃÖ»óÀ§ Á·º¸: %u\n\n", familyFreq[3], topFamilyCount[3]);
-	printf("5. ½ºÆ®·¹ÀÌÆ®\n\tµîÀå È½¼ö: %u, ÃÖ»óÀ§ Á·º¸: %u\n\n", familyFreq[4], topFamilyCount[4]);
-	printf("6. ÇÃ·¯½Ã\n\tµîÀå È½¼ö: %u, ÃÖ»óÀ§ Á·º¸: %u\n\n", familyFreq[5], topFamilyCount[5]);
-	printf("7. Ç® ÇÏ¿ì½º\n\tµîÀå È½¼ö: %u, ÃÖ»óÀ§ Á·º¸: %u\n\n", familyFreq[6], topFamilyCount[6]);
-	printf("8. Æ÷ Ä«µå\n\tµîÀå È½¼ö: %u, ÃÖ»óÀ§ Á·º¸: %u\n\n", familyFreq[7], topFamilyCount[7]);
-	printf("9. ½ºÆ®·¹ÀÌÆ® ÇÃ·¯½Ã\n\tµîÀå È½¼ö: %u, ÃÖ»óÀ§ Á·º¸: %u\n\n", familyFreq[8], topFamilyCount[8]);
+	printf("%dë²ˆì§¸ ì‹œë®¬ë ˆì´ì…˜\n\n", trial);
+	printf("ì¡±ë³´ ë“±ì¥íšŸìˆ˜\n");
+	printf("1. ì› í˜ì–´\n\të“±ì¥ íšŸìˆ˜: %u, ìµœìƒìœ„ ì¡±ë³´: %u\n\n", familyFreq[0], topFamilyCount[0]);
+	printf("2. íˆ¬ í˜ì–´\n\të“±ì¥ íšŸìˆ˜: %u, ìµœìƒìœ„ ì¡±ë³´: %u\n\n", familyFreq[1], topFamilyCount[1]);
+	printf("3. ì“°ë¦¬ í˜ì–´\n\të“±ì¥ íšŸìˆ˜: %u, ìµœìƒìœ„ ì¡±ë³´: %u\n\n", familyFreq[2], topFamilyCount[2]);
+	printf("4. íŠ¸ë¦¬í”Œ\n\të“±ì¥ íšŸìˆ˜: %u, ìµœìƒìœ„ ì¡±ë³´: %u\n\n", familyFreq[3], topFamilyCount[3]);
+	printf("5. ìŠ¤íŠ¸ë ˆì´íŠ¸\n\të“±ì¥ íšŸìˆ˜: %u, ìµœìƒìœ„ ì¡±ë³´: %u\n\n", familyFreq[4], topFamilyCount[4]);
+	printf("6. í”ŒëŸ¬ì‹œ\n\të“±ì¥ íšŸìˆ˜: %u, ìµœìƒìœ„ ì¡±ë³´: %u\n\n", familyFreq[5], topFamilyCount[5]);
+	printf("7. í’€ í•˜ìš°ìŠ¤\n\të“±ì¥ íšŸìˆ˜: %u, ìµœìƒìœ„ ì¡±ë³´: %u\n\n", familyFreq[6], topFamilyCount[6]);
+	printf("8. í¬ ì¹´ë“œ\n\të“±ì¥ íšŸìˆ˜: %u, ìµœìƒìœ„ ì¡±ë³´: %u\n\n", familyFreq[7], topFamilyCount[7]);
+	printf("9. ìŠ¤íŠ¸ë ˆì´íŠ¸ í”ŒëŸ¬ì‹œ\n\të“±ì¥ íšŸìˆ˜: %u, ìµœìƒìœ„ ì¡±ë³´: %u\n\n", familyFreq[8], topFamilyCount[8]);
 	for(int i = 0; i < HAND_CNT; i++)	sum += topFamilyCount[i];
-	printf("ÃÑ Á·º¸ µîÀå È½¼ö: %u\n", sum);
+	printf("ì´ ì¡±ë³´ ë“±ì¥ íšŸìˆ˜: %u\n", sum);
 	printf("-------------------------------------------------------------------------\n");
 }
 
 void printResult()	{
 	printf("\n");
-	printf("1. ¿ø Æä¾î\n\tÆò±Õ µîÀå È½¼ö: %lf Æò±Õ ÃÖ»óÀ§ Á·º¸: %lf\n\n", (double)totalFamilyFreq[0] / SIMUL, (double)totalTopFamilyCount[0] / SIMUL);
-	printf("2. Åõ Æä¾î\n\tÆò±Õ µîÀå È½¼ö: %lf, Æò±Õ ÃÖ»óÀ§ Á·º¸: %lf\n\n", (double)totalFamilyFreq[1] / SIMUL, (double)totalTopFamilyCount[1] / SIMUL);
-	printf("3. ¾²¸® Æä¾î\n\tÆò±Õ µîÀå È½¼ö: %lf, Æò±Õ ÃÖ»óÀ§ Á·º¸: %lf\n\n", (double)totalFamilyFreq[2] / SIMUL, (double)totalTopFamilyCount[2] / SIMUL);
-	printf("4. Æ®¸®ÇÃ\n\tÆò±Õ µîÀå È½¼ö: %lf, Æò±Õ ÃÖ»óÀ§ Á·º¸: %lf\n\n", (double)totalFamilyFreq[3] / SIMUL, (double)totalTopFamilyCount[3] / SIMUL);
-	printf("5. ½ºÆ®·¹ÀÌÆ®\n\tÆò±Õ µîÀå È½¼ö: %lf, Æò±Õ ÃÖ»óÀ§ Á·º¸: %lf\n\n", (double)totalFamilyFreq[4] / SIMUL, (double)totalTopFamilyCount[4] / SIMUL);
-	printf("6. ÇÃ·¯½Ã\n\tÆò±Õ µîÀå È½¼ö: %lf, Æò±Õ ÃÖ»óÀ§ Á·º¸: %lf\n\n", (double)totalFamilyFreq[5] / SIMUL, (double)totalTopFamilyCount[5] / SIMUL);
-	printf("7. Ç® ÇÏ¿ì½º\n\tÆò±Õ µîÀå È½¼ö: %lf, Æò±Õ ÃÖ»óÀ§ Á·º¸: %lf\n\n", (double)totalFamilyFreq[6] / SIMUL, (double)totalTopFamilyCount[6] / SIMUL);
-	printf("8. Æ÷ Ä«µå\n\tÆò±Õ µîÀå È½¼ö: %lf, Æò±Õ ÃÖ»óÀ§ Á·º¸: %lf\n\n", (double)totalFamilyFreq[7] / SIMUL, (double)totalTopFamilyCount[7] / SIMUL);
-	printf("9. ½ºÆ®·¹ÀÌÆ® ÇÃ·¯½Ã\n\tÆò±Õ µîÀå È½¼ö: %lf, Æò±Õ ÃÖ»óÀ§ Á·º¸: %lf\n\n", (double)totalFamilyFreq[8] / SIMUL, (double)totalTopFamilyCount[8] / SIMUL);
+	printf("1. ì› í˜ì–´\n\tí‰ê·  ë“±ì¥ íšŸìˆ˜: %lf í‰ê·  ìµœìƒìœ„ ì¡±ë³´: %lf\n\n", (double)totalFamilyFreq[0] / SIMUL, (double)totalTopFamilyCount[0] / SIMUL);
+	printf("2. íˆ¬ í˜ì–´\n\tí‰ê·  ë“±ì¥ íšŸìˆ˜: %lf, í‰ê·  ìµœìƒìœ„ ì¡±ë³´: %lf\n\n", (double)totalFamilyFreq[1] / SIMUL, (double)totalTopFamilyCount[1] / SIMUL);
+	printf("3. ì“°ë¦¬ í˜ì–´\n\tí‰ê·  ë“±ì¥ íšŸìˆ˜: %lf, í‰ê·  ìµœìƒìœ„ ì¡±ë³´: %lf\n\n", (double)totalFamilyFreq[2] / SIMUL, (double)totalTopFamilyCount[2] / SIMUL);
+	printf("4. íŠ¸ë¦¬í”Œ\n\tí‰ê·  ë“±ì¥ íšŸìˆ˜: %lf, í‰ê·  ìµœìƒìœ„ ì¡±ë³´: %lf\n\n", (double)totalFamilyFreq[3] / SIMUL, (double)totalTopFamilyCount[3] / SIMUL);
+	printf("5. ìŠ¤íŠ¸ë ˆì´íŠ¸\n\tí‰ê·  ë“±ì¥ íšŸìˆ˜: %lf, í‰ê·  ìµœìƒìœ„ ì¡±ë³´: %lf\n\n", (double)totalFamilyFreq[4] / SIMUL, (double)totalTopFamilyCount[4] / SIMUL);
+	printf("6. í”ŒëŸ¬ì‹œ\n\tí‰ê·  ë“±ì¥ íšŸìˆ˜: %lf, í‰ê·  ìµœìƒìœ„ ì¡±ë³´: %lf\n\n", (double)totalFamilyFreq[5] / SIMUL, (double)totalTopFamilyCount[5] / SIMUL);
+	printf("7. í’€ í•˜ìš°ìŠ¤\n\tí‰ê·  ë“±ì¥ íšŸìˆ˜: %lf, í‰ê·  ìµœìƒìœ„ ì¡±ë³´: %lf\n\n", (double)totalFamilyFreq[6] / SIMUL, (double)totalTopFamilyCount[6] / SIMUL);
+	printf("8. í¬ ì¹´ë“œ\n\tí‰ê·  ë“±ì¥ íšŸìˆ˜: %lf, í‰ê·  ìµœìƒìœ„ ì¡±ë³´: %lf\n\n", (double)totalFamilyFreq[7] / SIMUL, (double)totalTopFamilyCount[7] / SIMUL);
+	printf("9. ìŠ¤íŠ¸ë ˆì´íŠ¸ í”ŒëŸ¬ì‹œ\n\tí‰ê·  ë“±ì¥ íšŸìˆ˜: %lf, í‰ê·  ìµœìƒìœ„ ì¡±ë³´: %lf\n\n", (double)totalFamilyFreq[8] / SIMUL, (double)totalTopFamilyCount[8] / SIMUL);
 }
 
 void simulate() {
@@ -261,19 +257,19 @@ void simulate() {
         initHand();
         initNote();
 
-        card field[7];
+        card field[LINE];
         for (int i = 0; i < LINE; i++) field[i] = draw_card();
 
         for (int note = 0; note < 1500; note++) {
             int idx = note_lines[note];
 
-    		field[idx].durable--;
+    		field[idx].durable--; // ë‚´êµ¬ë„ ê°ì†Œ 
     		if (field[idx].durable == 0) {
         		grave.push_back(field[idx]);
         		field[idx] = draw_card();
-    		} // ÇØ´ç ¶óÀÎ¿¡ ÀÖ´Â Ä«µåÀÇ ³»±¸µµ°¡ 0ÀÎ °æ¿ì, grave·Î ÀÌµ¿ ¹× »õ·Î¿î  Ä«µå draw 
+    		} // í•´ë‹¹ ë¼ì¸ì— ìˆëŠ” ì¹´ë“œì˜ ë‚´êµ¬ë„ê°€ 0ì¸ ê²½ìš°, graveë¡œ ì´ë™ ë° ìƒˆë¡œìš´  ì¹´ë“œ draw 
 
-            // Á·º¸ ÆÇ´Ü
+            // ì¡±ë³´ íŒë‹¨
             check_hand(field);
         }
         for(int i = 0; i < HAND_CNT; i++)	{
